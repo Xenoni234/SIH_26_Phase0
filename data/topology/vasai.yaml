@@ -1,0 +1,142 @@
+# =============================================================================
+# Vasai Road Junction (BSR) — Canonical Operational Topology
+# Single source of truth for the Digital Twin graph. Grounded in real data
+# (see data/reference/bsr-datasets.md). Consumed by app/topology/loader.py.
+#
+# Units: distances in km from BSR. Corridors are ordered station lists moving
+# AWAY from Vasai Road. Blocks between consecutive stations are auto-generated
+# by the loader unless overridden here.
+# =============================================================================
+
+meta:
+  junction:
+    code: BSR
+    name: Vasai Road
+    local_name: Bassein Road
+    zone: WR            # Western Railway
+    division: Mumbai
+    category: SG-1
+    lat: 19.3861
+    lon: 72.8317
+  crs: EPSG:4326
+  source: "India Rail Info departures (external prototype reference; not RTIS)"
+
+# --- Platforms at Vasai Road (P1–P7, confirmed by dataset) -------------------
+# `serves` = corridors that typically use the platform (soft hint, not a hard rule).
+platforms:
+  - id: BSR-P1
+    number: 1
+    length_m: 340
+    serves: [western, north]
+  - id: BSR-P2
+    number: 2
+    length_m: 340
+    serves: [western, north]
+  - id: BSR-P3
+    number: 3
+    length_m: 340
+    serves: [western, north, diva]
+  - id: BSR-P4
+    number: 4
+    length_m: 340
+    serves: [western, north]
+  - id: BSR-P5
+    number: 5
+    length_m: 340
+    serves: [western, diva]
+  - id: BSR-P6
+    number: 6
+    length_m: 550
+    serves: [express, north]
+  - id: BSR-P7
+    number: 7
+    length_m: 550
+    serves: [express, diva]
+
+# --- Corridors (ordered outward from BSR) ------------------------------------
+# `tracks` = number of running lines (Western is quadruple near BSR).
+corridors:
+  north:
+    name: North / Virar (towards Surat)
+    direction: north
+    tracks: 4
+    stations:
+      - { code: BSR,  name: Vasai Road,    km: 0 }
+      - { code: NSP,  name: Nalla Sopara,  km: 4 }
+      - { code: VR,   name: Virar,         km: 8 }
+      - { code: VTN,  name: Vaitarna,      km: 17 }
+      - { code: DRD,  name: Dahanu Road,   km: 60 }
+    note: >
+      Virar (VR) is the northern hub; Nalla Sopara (NSP) is the immediate neighbour. Beyond Virar the
+      line continues to Vaitarna (VTN), Dahanu Road (DRD) and Surat/north. Locals commonly terminate
+      at VR/NSP; through trains continue north.
+
+  western:
+    name: Western / Mumbai
+    direction: south
+    tracks: 4              # quadruple electric line
+    stations:
+      - { code: BSR,  name: Vasai Road,  km: 0 }
+      - { code: NIG,  name: Naigaon,     km: 4 }
+      - { code: BYR,  name: Bhayandar,   km: 9 }
+      - { code: MIRA, name: Mira Road,   km: 12 }
+      - { code: DIC,  name: Dahisar,     km: 15 }
+      - { code: BVI,  name: Borivali,    km: 18 }
+      - { code: ADH,  name: Andheri,     km: 30 }
+      - { code: BA,   name: Bandra,      km: 42 }
+      - { code: DDR,  name: Dadar,       km: 48 }
+      - { code: CCG,  name: Churchgate,  km: 60 }
+
+  diva:
+    name: Vasai–Diva–Panvel
+    direction: southeast
+    tracks: 2
+    stations:
+      - { code: BSR,  name: Vasai Road,    km: 0 }
+      - { code: JCNR, name: Juchandra,     km: 5 }
+      - { code: KARD, name: Kaman Road,    km: 11 }
+      - { code: KHBV, name: Kharbav,      km: 16 }
+      - { code: BIRD, name: Bhiwandi Road, km: 22 }
+      - { code: KOPR, name: Kopar,        km: 30 }
+      - { code: DIVA, name: Diva,         km: 42 }
+      - { code: PNVL, name: Panvel,       km: 65 }
+
+# --- Operational resources (not passenger branches) --------------------------
+yard:
+  id: BSR-NORTH-YARD
+  name: North Yard / Sidings
+  parallel_to: north           # runs parallel to the Vasai–Virar corridor
+  sidings: 4
+  note: Holding/stabling resource, modelled parallel to the BSR–NSP–VR line.
+
+freight:
+  id: BSR-FREIGHT
+  name: Freight / Goods area
+  associated_corridor: diva    # goods operations on the Diva side
+  loops: 2
+  note: Goods loops/lines associated with the Diva-side operational direction.
+
+# --- Junction crossing points (where corridors compete) ----------------------
+junctions:
+  - id: J-BSR-NORTH
+    name: BSR North throat
+    connects: [north, western, yard]
+  - id: J-BSR-SOUTH
+    name: BSR South throat
+    connects: [western, diva, freight]
+
+# --- Signals (minimal Phase-0 set; expanded in later phases) -----------------
+signals:
+  - { id: S-BSR-N1, at: J-BSR-NORTH, kind: home }
+  - { id: S-BSR-N2, at: J-BSR-NORTH, kind: starter }
+  - { id: S-BSR-S1, at: J-BSR-SOUTH, kind: home }
+  - { id: S-BSR-S2, at: J-BSR-SOUTH, kind: starter }
+
+# --- Default headway / dwell (hard-constraint defaults; per-train may vary) ---
+defaults:
+  headway_seconds: 120
+  dwell_seconds:
+    local: 30
+    express: 60
+    freight: 0
+    memu: 30

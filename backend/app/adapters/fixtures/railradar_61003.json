@@ -1,0 +1,13 @@
+{
+  "trainNumber": "61003",
+  "trainName": "Vasai Road - Diva MEMU",
+  "currentStationCode": "BSR",
+  "nextStationCode": "JCNR",
+  "toStationCode": "DIVA",
+  "platform": 7,
+  "latitude": 19.3861,
+  "longitude": 72.8317,
+  "speed": 12,
+  "delay": 0,
+  "eta": "2026-08-16T10:50:00+05:30"
+}

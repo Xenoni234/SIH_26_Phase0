@@ -1,0 +1,13 @@
+{
+  "trainNumber": "12283",
+  "trainName": "Ernakulam Jn - Hazrat Nizamuddin Duronto Exp",
+  "currentStationCode": "BSR",
+  "nextStationCode": "NSP",
+  "toStationCode": "NZM",
+  "platform": 6,
+  "latitude": 19.3861,
+  "longitude": 72.8317,
+  "speed": 0,
+  "delay": 12,
+  "eta": "2026-08-16T17:20:00+05:30"
+}

@@ -1,0 +1,56 @@
+# Phase 0 stack: PostGIS + Redis + FastAPI backend.
+# Usage: cp .env.example .env && docker compose up --build
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-vasai}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-vasai}
+      POSTGRES_DB: ${POSTGRES_DB:-vasai_twin}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./infra/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-vasai} -d ${POSTGRES_DB:-vasai_twin}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build: ./backend
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      # Override host names to the compose service names (compose network).
+      POSTGRES_HOST: db
+      REDIS_HOST: redis
+      TOPOLOGY_PATH: /app/data/topology/vasai.yaml
+    volumes:
+      - ./backend:/app
+      - ./data:/app/data:ro
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: >
+      sh -c "alembic upgrade head &&
+             uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
+
+volumes:
+  pgdata:

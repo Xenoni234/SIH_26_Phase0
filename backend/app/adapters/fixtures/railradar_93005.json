@@ -1,0 +1,13 @@
+{
+  "trainNumber": "93005",
+  "trainName": "Churchgate - Dahanu Road Fast Local",
+  "currentStationCode": "BSR",
+  "nextStationCode": "NSP",
+  "toStationCode": "DRD",
+  "platform": 4,
+  "latitude": 19.3861,
+  "longitude": 72.8317,
+  "speed": 34,
+  "delay": 3,
+  "eta": "2026-08-16T07:38:00+05:30"
+}
