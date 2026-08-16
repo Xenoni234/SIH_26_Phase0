@@ -29,10 +29,21 @@ def test_snapshot_positions_are_on_the_graph(topology_path):
     assert snap["type"] == "twin_tick"
     assert snap["count"] >= 1
     for t in snap["trains"]:
+        if t["type"] == "freight":
+            continue  # synthetic yard rakes use corridor="freight"/status="stabled"
         assert t["from_station"] and t["to_station"]
         assert 0.0 <= t["frac"] <= 1.0
         assert t["corridor"] in {"north", "western", "diva"}
         assert t["status"] in {"approaching", "departed", "at_platform"}
+
+
+def test_synthetic_freight_in_snapshot(topology_path):
+    eng = _engine(topology_path)
+    eng.seed()
+    eng.sim_now = datetime(2026, 8, 16, 0, 5, 0, tzinfo=IST)
+    freight = [t for t in eng.snapshot()["trains"] if t["type"] == "freight"]
+    assert len(freight) == 4
+    assert all(t["status"] == "stabled" for t in freight)
 
 
 def test_memu_uses_diva_corridor(topology_path):

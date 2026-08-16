@@ -190,6 +190,7 @@ class SimulationEngine:
         active = active[: self.settings.sim_max_trains]
 
         trains = [self._position(delta, st) for _, delta, st in active]
+        trains.extend(self._freight_payloads())  # synthetic goods rakes in the yard
         return {
             "type": "twin_tick",
             "sim_time": now.strftime("%H:%M:%S"),
@@ -197,6 +198,44 @@ class SimulationEngine:
             "count": len(trains),
             "trains": trains,
         }
+
+    _FREIGHT = [
+        ("G-2401", "BOXN Rake · Goods"),
+        ("G-2402", "Container · Goods"),
+        ("G-2403", "Tank Wagon · Goods"),
+        ("G-2404", "BCN Rake · Goods"),
+        ("G-2405", "BTAP · Goods"),
+        ("G-2406", "Flat Wagon · Goods"),
+    ]
+
+    def _freight_payloads(self) -> list[dict]:
+        """Synthetic goods rakes stabled in the yard / on the Diva goods side.
+
+        Real RailRadar station boards omit freight, so these are clearly-labelled
+        simulated movements so the yard is populated for the demo.
+        """
+        n = max(0, min(len(self._FREIGHT), self.settings.sim_synthetic_freight))
+        out = []
+        for i, (fid, name) in enumerate(self._FREIGHT[:n]):
+            out.append(
+                {
+                    "id": fid,
+                    "name": name,
+                    "type": TrainType.FREIGHT.value,
+                    "corridor": "freight",
+                    "from_station": "BSR",
+                    "to_station": "JCNR",       # Diva goods side in the corridor view
+                    "frac": round(0.12 + (i % 4) * 0.05, 3),
+                    "km_from_bsr": round((i % 4) * 0.6, 2),
+                    "status": "stabled",
+                    "source": "Yard",
+                    "destination": "DIVA",
+                    "platform": None,
+                    "at_platform": False,
+                    "minutes_to_departure": 0.0,
+                }
+            )
+        return out
 
     def _position(self, delta_min: float, st: SimTrain) -> dict:
         speed = _SPEED_KMPH.get(st.ttype, 40)

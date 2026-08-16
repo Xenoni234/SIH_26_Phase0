@@ -36,6 +36,7 @@ class Settings(BaseSettings):
     sim_speed: float = 20.0               # sim-time acceleration (20x real time)
     sim_window_minutes: int = 45          # trains within +/- this window are "around Vasai"
     sim_max_trains: int = 40              # cap for a legible view
+    sim_synthetic_freight: int = 4        # synthetic goods rakes (real boards omit freight)
 
     # --- Database ---
     postgres_user: str = "vasai"

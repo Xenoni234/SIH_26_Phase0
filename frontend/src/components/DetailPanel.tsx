@@ -13,7 +13,7 @@ function Row({ label, value }: { label: string; value: ReactNode }) {
 
 export default function DetailPanel({ selection }: { selection: Selection }) {
   return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
+    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900/70">
       <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">Details</h2>
 
       {!selection && (

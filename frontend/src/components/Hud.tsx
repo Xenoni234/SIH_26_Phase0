@@ -32,7 +32,7 @@ export default function Hud({ tick, conn }: { tick: TwinTick | null; conn: ConnS
   };
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-800 bg-slate-900/70 px-5 py-3">
+    <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white px-5 py-3 shadow-sm dark:border-slate-800 dark:bg-slate-900/70">
       <div className="flex items-center gap-3">
         <span className="relative flex h-3 w-3">
           <span className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-60" style={{ background: c.color }} />
@@ -82,7 +82,7 @@ function Trains({ value }: { value: ReactNode }) {
 function SpeedBtn({ label, onClick, disabled }: { label: string; onClick: () => void; disabled: boolean }) {
   return (
     <button onClick={onClick} disabled={disabled}
-      className="h-7 w-7 rounded-md border border-slate-700 bg-slate-800 text-slate-200 transition hover:bg-slate-700 disabled:opacity-40">
+      className="h-7 w-7 rounded-md border border-slate-300 bg-slate-100 text-slate-700 transition hover:bg-slate-200 disabled:opacity-40 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700">
       {label}
     </button>
   );
