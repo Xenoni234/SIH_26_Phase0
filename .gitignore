@@ -30,3 +30,6 @@ dist/
 # Data / runtime
 *.log
 pgdata/
+
+# Local operator notes (not committed)
+run.md
