@@ -1,0 +1,32 @@
+{
+  "success": true,
+  "data": {
+    "station": { "code": "BSR", "name": "VASAI ROAD", "lat": 19.3826676, "lng": 72.8320245 },
+    "trains": [
+      {
+        "train": { "number": "91018", "name": "Virar - Churchgate EMU", "type": "EMU",
+          "source": { "code": "VR", "name": "VIRAR" },
+          "destination": { "code": "CCG", "name": "CHURCHGATE" }, "runDays": ["mon"] },
+        "stop": { "sequence": 4, "arrival": "00:00", "departure": "00:02", "distance": 8.3, "stopType": "halt" }
+      },
+      {
+        "train": { "number": "93005", "name": "Churchgate - Dahanu Road Fast Local", "type": "EMU",
+          "source": { "code": "CCG", "name": "CHURCHGATE" },
+          "destination": { "code": "DRD", "name": "DAHANU ROAD" }, "runDays": ["mon"] },
+        "stop": { "sequence": 9, "arrival": "00:04", "departure": "00:05", "distance": 52.0, "stopType": "halt" }
+      },
+      {
+        "train": { "number": "61003", "name": "Vasai Road - Diva MEMU", "type": "MEMU",
+          "source": { "code": "BSR", "name": "VASAI ROAD" },
+          "destination": { "code": "DIVA", "name": "DIVA" }, "runDays": ["mon"] },
+        "stop": { "sequence": 1, "arrival": "00:08", "departure": "00:10", "distance": 0.0, "stopType": "origin" }
+      },
+      {
+        "train": { "number": "12283", "name": "Ernakulam - Nizamuddin Duronto", "type": "DRNT",
+          "source": { "code": "ERS", "name": "ERNAKULAM" },
+          "destination": { "code": "NZM", "name": "NIZAMUDDIN" }, "runDays": ["mon"] },
+        "stop": { "sequence": 5, "arrival": "00:12", "departure": "00:14", "distance": 1331.0, "stopType": "halt" }
+      }
+    ]
+  }
+}

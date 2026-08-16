@@ -1,4 +1,4 @@
-"""Shared test fixtures. Points settings at the repo's real topology YAML."""
+"""Shared test fixtures. Resolves the topology YAML across local + container layouts."""
 from __future__ import annotations
 
 import os
@@ -6,12 +6,29 @@ from pathlib import Path
 
 import pytest
 
-# Resolve the topology file relative to the repo (works outside Docker too).
-_REPO_ROOT = Path(__file__).resolve().parents[2]
-_TOPOLOGY = _REPO_ROOT / "data" / "topology" / "vasai.yaml"
-os.environ.setdefault("TOPOLOGY_PATH", str(_TOPOLOGY))
+_HERE = Path(__file__).resolve()
+
+# Candidate locations, first existing wins:
+#  1) explicit env var (set in Docker), 2) repo-root/data (local checkout),
+#  3) container mount at /app/data.
+_CANDIDATES = [
+    os.environ.get("TOPOLOGY_PATH"),
+    str(_HERE.parents[2] / "data" / "topology" / "vasai.yaml"),  # repo root
+    "/app/data/topology/vasai.yaml",                              # container
+]
+
+
+def _resolve() -> str:
+    for c in _CANDIDATES:
+        if c and Path(c).exists():
+            return c
+    raise FileNotFoundError(f"vasai.yaml not found in any of: {_CANDIDATES}")
+
+
+_TOPOLOGY = _resolve()
+os.environ["TOPOLOGY_PATH"] = _TOPOLOGY  # make app + fixture agree
 
 
 @pytest.fixture(scope="session")
 def topology_path() -> str:
-    return str(_TOPOLOGY)
+    return _TOPOLOGY

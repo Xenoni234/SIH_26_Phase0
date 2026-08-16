@@ -217,8 +217,18 @@ throughput · platform & route utilization · on-time percentage · recovery tim
 
 ## Status
 
-🚧 **Phase 0 — documentation & scaffolding.** Getting-started / setup instructions will be added here
-as the stack lands.
+✅ **Phase 0 — Foundations** (backend, topology, adapters, DB schema, API).
+✅ **Phase 1 — Digital Twin State + Static Map** (topology persisted; React + SVG schematic + detail panel).
+✅ **Phase 2 — Live Simulation from real data**: the backend fetches the **real RailRadar station board
+for Vasai** (all trains serving BSR — no hardcoded list), caches it (respecting the 50-req/day free
+tier), and runs a live simulation that animates every train around Vasai along its real corridor,
+streamed over **WebSocket** (`/ws/twin`). The front end renders a live twin — animated trains, a sim
+clock, connection status, and a live train list — with a REST-polling fallback.
+🚧 **Next — Phase 3**: prediction layer (ETA · delay propagation · conflict).
+
+**Run it:** backend `docker compose up --build`; front end `cd frontend && npm install && npm run dev`
+→ open the printed localhost URL. Add your `RAILRADAR_API_KEY` to `.env` for live data (else it uses a
+recorded board fixture). Full commands in `run.md` (local).
 
 ---
 

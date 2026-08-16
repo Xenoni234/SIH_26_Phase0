@@ -55,6 +55,86 @@ class RailRadarAdapter(SourceAdapter):
         return trains
 
     # ------------------------------------------------------------------ #
+    # Station board — ALL trains serving Vasai (one request, cached)      #
+    # ------------------------------------------------------------------ #
+    def get_station_board(self, code: str | None = None) -> list[dict]:
+        """Return every train serving the station as normalized board entries.
+
+        Uses GET /stations/{code}/trains. Cached in Redis for `board_ttl` so we
+        never exceed the 50/day free tier. Falls back to the board fixture when
+        no key is set. Real response shape:
+            {success, data:{station, trains:[{train:{number,name,type,source,
+             destination,runDays}, stop:{sequence,arrival,departure,arrivalDay,
+             departureDay,distance,stopType}}]}}
+        """
+        code = code or self.settings.railradar_station_code
+        payload = self._fetch_station_board(code)
+        if not payload:
+            payload = self._board_fixture()
+        return self._normalize_board(payload)
+
+    def _fetch_station_board(self, code: str) -> dict | None:
+        if not self.settings.railradar_enabled:
+            return None
+        cache_key = f"railradar:board:{code}"
+        if self._redis is not None:
+            cached = self._redis.get(cache_key)
+            if cached:
+                return json.loads(cached)
+
+        url = f"{self.settings.railradar_base_url}/stations/{code}/trains"
+        headers = {"Authorization": f"Bearer {self.settings.railradar_api_key}"}
+        try:
+            client = self._http or httpx.Client(timeout=15.0)
+            resp = client.get(url, headers=headers)
+            resp.raise_for_status()
+            data = resp.json()
+        except Exception as exc:
+            log.warning("RailRadar station board fetch failed for %s: %s", code, exc)
+            return None
+
+        if self._redis is not None:
+            self._redis.setex(cache_key, self.settings.railradar_board_ttl, json.dumps(data))
+        return data
+
+    def _board_fixture(self) -> dict:
+        fp = _FIXTURE_DIR / "railradar_board_BSR.json"
+        if fp.exists():
+            return json.loads(fp.read_text())
+        return {"data": {"trains": []}}
+
+    @classmethod
+    def _normalize_board(cls, payload: dict) -> list[dict]:
+        data = payload.get("data", payload)
+        entries = data.get("trains", []) if isinstance(data, dict) else []
+        out: list[dict] = []
+        for item in entries:
+            tr = item.get("train", {})
+            stop = item.get("stop", {})
+            number = str(tr.get("number", "")).strip()
+            if not number:
+                continue
+            src = (tr.get("source") or {})
+            dst = (tr.get("destination") or {})
+            out.append(
+                {
+                    "number": number,
+                    "name": tr.get("name"),
+                    "type": _map_board_type(tr.get("type"), tr.get("name") or "", number),
+                    "source_code": (src.get("code") or "").upper(),
+                    "dest_code": (dst.get("code") or "").upper(),
+                    "arrival": stop.get("arrival"),
+                    "departure": stop.get("departure"),
+                    "arrival_day": stop.get("arrivalDay"),
+                    "departure_day": stop.get("departureDay"),
+                    "distance": stop.get("distance"),
+                    "stop_type": stop.get("stopType"),
+                    "run_days": tr.get("runDays") or [],
+                }
+            )
+        return out
+
+    # ------------------------------------------------------------------ #
     # Live fetch (cached)                                                #
     # ------------------------------------------------------------------ #
     def _fetch_live(self, number: str) -> dict | None:
@@ -161,6 +241,21 @@ def _parse_dt(v):
         return datetime.fromisoformat(str(v).replace("Z", "+00:00"))
     except ValueError:
         return None
+
+
+def _map_board_type(api_type: str | None, name: str, number: str) -> str:
+    """Map RailRadar board `type` (EMU/MEMU/Exp/SF/...) to our TrainType value."""
+    t = (api_type or "").upper()
+    if t == "MEMU" or number.startswith(("61", "69")):
+        return TrainType.MEMU.value
+    if t in {"EMU", "LOCAL"} or number.startswith(("90", "91", "92", "93", "94")):
+        return TrainType.LOCAL.value
+    if t in {"EXP", "SF", "SUF", "MAIL", "EXPRESS", "DRNT", "DURONTO", "HUMSAFAR",
+             "RAJDHANI", "GARIBRATH", "SKR"}:
+        return TrainType.EXPRESS.value
+    if "GOODS" in name.upper() or "FREIGHT" in name.upper():
+        return TrainType.FREIGHT.value
+    return _guess_type(name, number).value
 
 
 def _guess_type(name: str, number: str) -> TrainType:

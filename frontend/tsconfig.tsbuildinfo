@@ -1,0 +1,1 @@
+{"root":["./src/app.tsx","./src/main.tsx","./src/types.ts","./src/vite-env.d.ts","./src/api/twin.ts","./src/components/detailpanel.tsx","./src/components/hud.tsx","./src/components/livetrainlist.tsx","./src/components/twinmap.tsx","./src/hooks/usetwinstream.ts","./src/lib/layout.ts"],"version":"5.9.3"}

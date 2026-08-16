@@ -15,7 +15,7 @@ def test_root():
     with _client() as c:
         r = c.get("/")
         assert r.status_code == 200
-        assert r.json()["phase"] == 0
+        assert r.json()["phase"] == 2
 
 
 def test_twin_summary():

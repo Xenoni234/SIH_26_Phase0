@@ -29,9 +29,9 @@ Topology/adapter/API tests need no database:
 
 ```bash
 cd backend
-python -m venv .venv && source .venv/bin/activate
-pip install -r requirements-dev.txt
-pytest
+python3 -m venv .venv && source .venv/bin/activate
+python3 -m pip install -r requirements-dev.txt
+python3 -m pytest
 ```
 
 ## RailRadar
