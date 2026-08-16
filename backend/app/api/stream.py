@@ -49,6 +49,13 @@ def sim_snapshot(request: Request) -> dict:
     return engine.snapshot()
 
 
+@router.post("/sim/speed", tags=["stream"])
+def set_speed(value: float, request: Request) -> dict:
+    """Set the simulation-time acceleration (clamped 1–200×)."""
+    engine: SimulationEngine = request.app.state.engine
+    return {"sim_speed": engine.set_speed(value)}
+
+
 @router.websocket("/ws/twin")
 async def ws_twin(ws: WebSocket) -> None:
     broadcaster: Broadcaster = ws.app.state.broadcaster

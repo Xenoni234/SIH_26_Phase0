@@ -111,6 +111,11 @@ class SimulationEngine:
         self._redis = None
         self.sim_now = datetime.now(IST)
         self._last_board_fetch = 0.0
+        self.speed = float(self.settings.sim_speed)  # mutable at runtime
+
+    def set_speed(self, value: float) -> float:
+        self.speed = max(1.0, min(200.0, float(value)))
+        return self.speed
 
     # ------------------------------------------------------------------ #
     def attach_redis(self, redis_client) -> None:
@@ -165,7 +170,7 @@ class SimulationEngine:
 
     # ------------------------------------------------------------------ #
     def tick(self) -> None:
-        self.sim_now += timedelta(seconds=self.settings.sim_tick_seconds * self.settings.sim_speed)
+        self.sim_now += timedelta(seconds=self.settings.sim_tick_seconds * self.speed)
 
     def snapshot(self) -> dict:
         now = self.sim_now
@@ -188,7 +193,7 @@ class SimulationEngine:
         return {
             "type": "twin_tick",
             "sim_time": now.strftime("%H:%M:%S"),
-            "sim_speed": self.settings.sim_speed,
+            "sim_speed": self.speed,
             "count": len(trains),
             "trains": trains,
         }

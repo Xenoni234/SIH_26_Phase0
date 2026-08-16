@@ -20,5 +20,11 @@ export const getStations = () => getJSON<StationsResponse>("/stations");
 import type { TwinTick } from "../types";
 export const getSnapshot = () => getJSON<TwinTick>("/sim/snapshot");
 
+export async function setSpeed(value: number): Promise<number> {
+  const res = await fetch(`${BASE}/sim/speed?value=${value}`, { method: "POST" });
+  if (!res.ok) throw new Error(`/sim/speed → HTTP ${res.status}`);
+  return (await res.json()).sim_speed as number;
+}
+
 export const API_BASE = BASE;
 export const WS_URL = BASE.replace(/^http/, "ws") + "/ws/twin";
