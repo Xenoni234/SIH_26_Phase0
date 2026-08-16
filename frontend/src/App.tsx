@@ -3,14 +3,18 @@ import type { Selection, TwinResponse } from "./types";
 import { getTwin } from "./api/twin";
 import { useTwinStream } from "./hooks/useTwinStream";
 import TwinMap from "./components/TwinMap";
+import StationTrackMap from "./components/StationTrackMap";
 import Hud from "./components/Hud";
 import LiveTrainList from "./components/LiveTrainList";
 import DetailPanel from "./components/DetailPanel";
+
+type ViewMode = "corridor" | "station";
 
 export default function App() {
   const [twin, setTwin] = useState<TwinResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [selection, setSelection] = useState<Selection>(null);
+  const [view, setView] = useState<ViewMode>("corridor");
   const { tick, conn } = useTwinStream();
 
   useEffect(() => {
@@ -45,7 +49,19 @@ export default function App() {
         {twin && (
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
             <div className="lg:col-span-2">
-              <TwinMap twin={twin} trains={trains} selection={selection} onSelect={setSelection} />
+              <div className="mb-3 flex items-center gap-2">
+                <ViewToggle view={view} onChange={setView} />
+                <span className="text-xs text-slate-500">
+                  {view === "corridor"
+                    ? "Corridors around Vasai — how trains approach & leave"
+                    : "Station tracks — platform-wise arrivals (PF1–7)"}
+                </span>
+              </div>
+              {view === "corridor" ? (
+                <TwinMap twin={twin} trains={trains} selection={selection} onSelect={setSelection} />
+              ) : (
+                <StationTrackMap trains={trains} selection={selection} onSelect={setSelection} />
+              )}
               <Legend />
             </div>
             <div className="flex flex-col gap-4">
@@ -60,6 +76,28 @@ export default function App() {
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+function ViewToggle({ view, onChange }: { view: ViewMode; onChange: (v: ViewMode) => void }) {
+  const opts: { key: ViewMode; label: string }[] = [
+    { key: "corridor", label: "Corridor view" },
+    { key: "station", label: "Station tracks" },
+  ];
+  return (
+    <div className="inline-flex rounded-lg border border-slate-700 bg-slate-900 p-0.5">
+      {opts.map((o) => (
+        <button
+          key={o.key}
+          onClick={() => onChange(o.key)}
+          className={`rounded-md px-3 py-1.5 text-sm font-medium transition ${
+            view === o.key ? "bg-sky-600 text-white" : "text-slate-400 hover:text-slate-200"
+          }`}
+        >
+          {o.label}
+        </button>
+      ))}
     </div>
   );
 }

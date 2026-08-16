@@ -86,6 +86,7 @@ export interface SimTrain {
   source: string;
   destination: string;
   platform: number | null;
+  at_platform: boolean;
   minutes_to_departure: number;
 }
 

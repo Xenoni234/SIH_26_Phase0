@@ -222,7 +222,8 @@ class SimulationEngine:
             "status": status,
             "source": st.source_code,
             "destination": st.dest_code,
-            "platform": st.platform if at_platform else None,
+            "platform": st.platform,          # target platform (also while approaching)
+            "at_platform": at_platform,
             "minutes_to_departure": round(delta_min, 1),
         }
 
